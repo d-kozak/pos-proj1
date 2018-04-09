@@ -1,3 +1,10 @@
+/**
+ * POS PROJ 1
+ * David Kozak
+ * summer term 2018
+ * 3 procs + exit code
+ */
+
 #define _XOPEN_SOURCE
 #define _XOPEN_SOURCE_EXTENDED 1 /* XPG 4.2 - needed for WCOREDUMP() */
 
@@ -7,6 +14,11 @@
 #include <unistd.h>
 
 
+/**
+ * prints info about current process
+ * should be called when the process starts
+ * @param label name of the process
+ */
 void printStartInfo(char *label) {
     printf("%s identification: \n", label); /*grandparent/parent/child */
     printf("	pid = %d,	ppid = %d,	pgrp = %d\n", getpid(), getppid(), getpgrp());
@@ -14,6 +26,12 @@ void printStartInfo(char *label) {
     printf("	euid = %d,	egid = %d\n", geteuid(), getegid());
 }
 
+/**
+ * prints info about process that was just terminated
+ * @param label name of the terminated process
+ * @param id id of the terminated process
+ * @param status status of the terminated process
+ */
 void printFinishInfo(char *label, pid_t id, int status) {
     printf("%s exit (pid = %d):", label, id);
     if (WIFEXITED(status)) {
@@ -29,6 +47,7 @@ void printFinishInfo(char *label, pid_t id, int status) {
         printf("	unknown type of termination\n");
     }
 }
+
 
 int main(int arc, char **argv) {
     if (arc < 2) {
@@ -54,6 +73,7 @@ int main(int arc, char **argv) {
             perror("fork");
             return 1;
         } else if (pid != 0) {
+            // parent
             signal(SIGINT, SIG_IGN);
             waitpid(id,
                     &status, 0);
@@ -61,6 +81,7 @@ int main(int arc, char **argv) {
             );
             return 0;
         } else {
+            // child
             printStartInfo("child");
             if(execv(argv[1], argv + 1) != 0){
                 perror("execv");
